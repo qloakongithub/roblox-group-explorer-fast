@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,9 +41,14 @@ const Index = () => {
 
   const fetchGroupInfo = async (id: string) => {
     try {
-      const response = await fetch(`https://groups.roblox.com/v1/groups/${id}`);
+      const proxyUrl = 'https://api.allorigins.win/get?url=';
+      const targetUrl = encodeURIComponent(`https://groups.roblox.com/v1/groups/${id}`);
+      const response = await fetch(`${proxyUrl}${targetUrl}`);
+      
       if (!response.ok) throw new Error('Group not found');
-      return await response.json();
+      
+      const data = await response.json();
+      return JSON.parse(data.contents);
     } catch (error) {
       throw new Error('Failed to fetch group information');
     }
@@ -52,10 +56,16 @@ const Index = () => {
 
   const fetchGroupMembers = async (id: string, cursor: string = '') => {
     try {
-      const url = `https://groups.roblox.com/v1/groups/${id}/users?sortOrder=Asc&limit=100${cursor ? `&cursor=${cursor}` : ''}`;
-      const response = await fetch(url);
+      const proxyUrl = 'https://api.allorigins.win/get?url=';
+      const targetUrl = encodeURIComponent(
+        `https://groups.roblox.com/v1/groups/${id}/users?sortOrder=Asc&limit=100${cursor ? `&cursor=${cursor}` : ''}`
+      );
+      const response = await fetch(`${proxyUrl}${targetUrl}`);
+      
       if (!response.ok) throw new Error('Failed to fetch members');
-      return await response.json();
+      
+      const data = await response.json();
+      return JSON.parse(data.contents);
     } catch (error) {
       throw new Error('Failed to fetch group members');
     }
