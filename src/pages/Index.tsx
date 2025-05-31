@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Users, Crown, Calendar } from 'lucide-react';
+import { Search, Users, Crown, Calendar, Download } from 'lucide-react';
 
 interface GroupInfo {
   id: number;
@@ -69,6 +69,36 @@ const Index = () => {
     } catch (error) {
       throw new Error('Failed to fetch group members');
     }
+  };
+
+  const exportMemberList = () => {
+    if (members.length === 0) {
+      toast({
+        title: "Error",
+        description: "No members to export",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formattedMembers = members.map(member => 
+      `[${member.role.rank}] ${member.user.username}`
+    ).join('\n');
+
+    const blob = new Blob([formattedMembers], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${groupInfo?.name || 'group'}_members.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Success",
+      description: `Exported ${members.length} members to text file`,
+    });
   };
 
   const handleSearch = async () => {
@@ -174,6 +204,16 @@ const Index = () => {
               >
                 {loading ? 'Searching...' : 'Search'}
               </Button>
+              {members.length > 0 && (
+                <Button 
+                  onClick={exportMemberList}
+                  variant="outline"
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -234,7 +274,17 @@ const Index = () => {
         {/* Members Grid */}
         {members.length > 0 && (
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-white">Group Members ({members.length})</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-2xl font-bold text-white">Group Members ({members.length})</h3>
+              <Button 
+                onClick={exportMemberList}
+                variant="outline"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export to Text
+              </Button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {members.map((member) => (
                 <Card 
